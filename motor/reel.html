@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>PayDefteri reel</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  html, body, .post { height: 1920px; }
+  .glow.a { width: 900px; height: 900px; background: rgba(124,58,237,.42); }
+  .glow.b { width: 760px; height: 700px; background: rgba(99,102,241,.26); }
+  .grid { -webkit-mask-image: radial-gradient(ellipse 75% 60% at 50% 50%, #000 20%, transparent 75%); }
+  .scene { position: absolute; inset: 0; opacity: 0; }
+  .scene .tt { position: absolute; left: 80px; right: 80px; text-align: center; z-index: 5; }
+  .scene h1 { font-size: 104px; line-height: 1.04; }
+  .scene h1 .w { display: inline-block; will-change: transform, opacity, filter; }
+  .scene .sub { margin-top: 30px; font-size: 38px; opacity: 0; }
+  .hook .tt { top: 50%; transform: translateY(-50%); }
+  .hook h1 { font-size: 124px; }
+  .ekran .tt { top: 190px; }
+  .ekran h1 { font-size: 92px; }
+  .phone.main { left: 50%; top: 640px; margin-left: -260px; z-index: 3; transform-style: preserve-3d;
+    box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.2), inset 0 0 0 4px #07080b, 0 70px 120px -20px rgba(0,0,0,.85), 0 0 140px rgba(124,58,237,.5); }
+  .crop { z-index: 4; border-radius: 26px; box-shadow: 0 40px 80px -10px rgba(0,0,0,.8), 0 0 0 1px rgba(167,139,250,.32), 0 0 90px rgba(124,58,237,.4); }
+  .halo { position: absolute; left: 540px; top: 1160px; width: 760px; height: 760px; margin: -380px 0 0 -380px; border-radius: 50%;
+    border: 2px solid rgba(192,132,252,.6); box-shadow: 0 0 30px rgba(168,85,247,.7), 0 0 100px rgba(124,58,237,.4), inset 0 0 40px rgba(168,85,247,.3); }
+  .son .box { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; z-index: 5; }
+  .son img.logo { width: 230px; height: 230px; border-radius: 58px; box-shadow: 0 0 0 1px rgba(167,139,250,.4), 0 0 160px rgba(124,58,237,.75); }
+  .son h1 { margin-top: 60px; font-size: 130px; }
+  .son .sub { opacity: 1; margin-top: 28px; }
+  .son .badge { margin-top: 80px; height: 150px; }
+  .son .url { margin-top: 40px; font-size: 30px; color: var(--muted); letter-spacing: .04em; }
+  .brand { top: 80px; }
+  /* Cover: built for the profile grid, which shows only the centre 4:5 band (y 285-1635) */
+  .cover { opacity: 1; display: none; }
+  .cover .spot { position: absolute; left: 540px; top: 1060px; width: 1400px; height: 900px; margin: -450px 0 0 -700px; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(167,139,250,.38), rgba(124,58,237,.16) 55%, transparent 100%); }
+  .cover .eyebrow { position: absolute; top: 320px; left: 50%; transform: translateX(-50%); z-index: 6; font-size: 26px; padding: 14px 28px; white-space: nowrap;
+    background: rgba(52,211,153,.12); border-color: rgba(52,211,153,.45); color: #a7f3d0; }
+  .cover .tt { top: 400px; left: 50px; right: 50px; }
+  .cover h1 { font-size: 150px; line-height: .98; text-shadow: 0 10px 60px rgba(124,58,237,.55); }
+  .cover h1 .grad { filter: drop-shadow(0 0 30px rgba(167,139,250,.45)); }
+  .cover .phone.main { left: auto; right: -40px; top: 860px; margin: 0; transform: rotate(9deg); opacity: .9; }
+  .cover .hero { z-index: 5; border-radius: 30px; transform: rotate(-4deg);
+    box-shadow: 0 0 0 3px rgba(196,181,253,.9), 0 0 0 12px rgba(124,58,237,.25), 0 50px 100px -10px rgba(0,0,0,.85), 0 0 160px rgba(124,58,237,.7); }
+  .cover .logo { position: absolute; left: 50%; top: 1500px; transform: translateX(-50%); z-index: 6; display: flex; align-items: center; gap: 16px;
+    padding: 12px 28px 12px 12px; border-radius: 999px; background: rgba(14,18,33,.88); border: 1px solid var(--line); }
+  .cover .logo img { width: 58px; height: 58px; border-radius: 16px; }
+  .cover .logo b { font: 700 34px Outfit, sans-serif; } .cover .logo b span { color: var(--violet-2); }
+</style>
+</head>
+<body>
+<div class="post" id="post">
+  <div class="glow a" id="ga"></div><div class="glow b" id="gb"></div><div class="grid"></div>
+  <header class="brand"><div class="id"><img src="assets/logo.png" alt=""><b>Pay<span>Defteri</span></b></div><div class="url">paydefteri.com</div></header>
+</div>
+<div class="noise"></div>
+<script src="kirpimlar.js"></script>
+<script>
+// build(scenes) lays out the reel; seek(t) draws time t. Scene kinds: hook, ekran, son. Each has dur (s).
+const clamp = v => Math.max(0, Math.min(1, v));
+const out3 = v => 1 - Math.pow(1 - clamp(v), 3);
+const prog = (u, a, d) => out3((u - a) / d);
+const FADE = .4;
+let SC = [];
+
+window.build = async (scenes) => {
+  await preload();
+  const post = document.getElementById('post');
+  let start = 0;
+  SC = scenes.map((s, i) => {
+    const el = document.createElement('section');
+    el.className = 'scene ' + s.kind;
+    const h1 = wordsMarkup(s.title);
+    if (s.kind === 'son') {
+      el.innerHTML = `<div class="halo" style="top:740px;width:560px;height:560px;margin:-280px 0 0 -280px"></div><div class="box">
+        <img class="logo" src="assets/logo.png" alt=""><h1>${h1 || 'Pay<span class="grad">Defteri</span>'}</h1>
+        <p class="sub">${markup(s.sub || 'Ortak plan, tek defter.')}</p>
+        ${s.play ? '<img class="badge" src="assets/google-play-badge-tr.png" alt=""><div class="url">Android’de ücretsiz · bağlantı profilde</div>' : '<div class="url">paydefteri.com</div>'}</div>`;
+    } else {
+      el.innerHTML = `<div class="tt"><h1>${h1}</h1>${s.sub ? `<p class="sub">${markup(s.sub)}</p>` : ''}</div>`;
+      if (s.kind === 'ekran') {
+        el.insertAdjacentHTML('afterbegin', '<div class="halo"></div>');
+        el.append(phoneEl(s.screen, 520, 'main'));
+        const crops = (s.crops || []).slice(0, 2);
+        crops.forEach((name, k) => {
+          const c = cropEl(name, 880, crops.length > 1 ? 300 : 400);
+          c.style.left = (540 - c.dataset.w / 2) + 'px';
+          c.style.top = (crops.length > 1 ? [1150, 1480][k] : 1220) + 'px';
+          el.append(c);
+        });
+      }
+    }
+    post.append(el);
+    const sc = { el, s, t0: start, last: i === scenes.length - 1 };
+    start += s.dur;
+    return sc;
+  });
+  window.DURATION = start;
+  await Promise.all([...document.images].map(i => i.decode().catch(() => {})));
+  seek(0);
+};
+
+// Cover for the grid: short punchy title, one real UI card as the hero, phone behind, logo pill.
+// k = spec.kapak {eyebrow, title, crop}; falls back to the hook title and the first scene crop.
+window.showCover = (k = {}) => {
+  const post = document.getElementById('post');
+  const first = SC.find(x => x.s.crops && x.s.crops.length) || {};
+  const title = k.title || SC[0].s.title;
+  const crop = k.crop || (first.s && first.s.crops[0]);
+  const scr = k.screen || (SC.find(x => x.s.screen) || {}).s?.screen || 'takip';
+  SC.forEach(x => { x.el.style.display = 'none'; });
+  post.querySelector('.brand').style.display = 'none';
+  const el = document.createElement('section'); el.className = 'scene cover'; el.style.display = 'block';
+  el.innerHTML = `<div class="spot"></div>${k.eyebrow ? `<div class="eyebrow"><i></i>${markup(k.eyebrow)}</div>` : ''}
+    <div class="tt"><h1>${markup(title)}</h1></div>
+    <div class="logo"><img src="assets/logo.png" alt=""><b>Pay<span>Defteri</span></b></div>`;
+  el.append(phoneEl(scr, 440, 'main'));
+  if (crop) {
+    const c = cropEl(crop, 860, 440, 'hero');
+    const top = Math.max(800, 1180 - c.dataset.h / 2);
+    c.style.left = (520 - c.dataset.w / 2) + 'px'; c.style.top = top + 'px';
+    el.append(c);
+  }
+  post.append(el);
+  document.getElementById('ga').style.transform = 'translate(-260px, 900px)';
+  document.getElementById('gb').style.transform = 'translate(520px, 120px)';
+  return Promise.all([...el.querySelectorAll('img')].map(i => i.decode().catch(() => {})));
+};
+
+window.seek = (t) => {
+  document.getElementById('ga').style.transform = `translate(${-200 + Math.sin(t * .35) * 120}px, ${900 + Math.cos(t * .3) * 160}px)`;
+  document.getElementById('gb').style.transform = `translate(${500 + Math.cos(t * .28) * 140}px, ${-200 + Math.sin(t * .4) * 120}px)`;
+  for (const { el, s, t0, last } of SC) {
+    const u = t - t0;
+    const vis = u < -0.01 || u > s.dur + FADE ? 0 : Math.min(t0 === 0 ? 1 : clamp(u / FADE), last ? 1 : clamp((s.dur + FADE - u) / FADE));
+    el.style.opacity = vis;
+    if (!vis) continue;
+    el.querySelectorAll('h1 .w').forEach((w, i) => {
+      const p = prog(u, .1 + i * .07, .5);
+      w.style.opacity = p; w.style.transform = `translateY(${(1 - p) * 50}px)`; w.style.filter = `blur(${(1 - p) * 10}px)`;
+    });
+    const sub = el.querySelector('.tt .sub');
+    if (sub) { const p = prog(u, .55, .5); sub.style.opacity = p; sub.style.transform = `translateY(${(1 - p) * 24}px)`; }
+    const ph = el.querySelector('.phone');
+    if (ph) {
+      const p = prog(u, .2, .9);
+      ph.style.opacity = p;
+      ph.style.transform = `perspective(1600px) translateY(${(1 - p) * 420 + Math.sin(u * 1.4) * 10}px) rotateY(${(1 - p) * -28 + Math.sin(u * .9) * 4}deg) rotate(${(1 - p) * 6}deg)`;
+    }
+    el.querySelectorAll(':scope > .crop').forEach((c, k) => {
+      const p = prog(u, 1.0 + k * .7, .55);
+      c.style.opacity = p; c.style.transform = `translateY(${(1 - p) * 60}px) scale(${.82 + p * .18})`;
+    });
+    const halo = el.querySelector('.halo');
+    if (halo) halo.style.transform = `scale(${.85 + prog(u, 0, 1.2) * .15})`;
+    const logo = el.querySelector('img.logo');
+    if (logo) {
+      const p = prog(u, .1, .6); logo.style.transform = `scale(${.6 + p * .4})`; logo.style.opacity = p;
+      el.querySelectorAll('.box > :not(img.logo):not(h1)').forEach((x, k) => { const q = prog(u, .6 + k * .2, .5); x.style.opacity = q; x.style.transform = `translateY(${(1 - q) * 30}px)`; });
+    }
+  }
+};
+</script>
+</body>
+</html>

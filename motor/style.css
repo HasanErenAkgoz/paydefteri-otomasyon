@@ -1,0 +1,121 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap');
+
+/* Brand tokens, taken from paydefteri.com */
+:root {
+  --bg: #090d16;
+  --bg-2: #0f1424;
+  --violet: #7c3aed;
+  --violet-2: #a78bfa;
+  --indigo: #818cf8;
+  --lilac: #c4b5fd;
+  --mint: #34d399;
+  --text: #f8fafc;
+  --muted: #a3abc2;
+  --line: rgba(167, 139, 250, .22);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 1080px; height: 1350px; overflow: hidden; background: var(--bg); }
+body { font-family: Inter, sans-serif; color: var(--text); -webkit-font-smoothing: antialiased; }
+
+.post { position: relative; width: 1080px; height: 1350px; overflow: hidden; background: var(--bg); }
+
+/* Background layers */
+.glow { position: absolute; border-radius: 50%; filter: blur(110px); pointer-events: none; }
+.grid {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(167,139,250,.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(167,139,250,.06) 1px, transparent 1px);
+  background-size: 60px 60px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, #000 20%, transparent 75%);
+}
+.noise {
+  position: absolute; inset: 0; opacity: .05; pointer-events: none; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Brand bar */
+.brand { position: absolute; top: 56px; left: 72px; right: 72px; display: flex; align-items: center; justify-content: space-between; z-index: 5; }
+.brand .id { display: flex; align-items: center; gap: 16px; }
+.brand img { width: 60px; height: 60px; border-radius: 16px; box-shadow: 0 0 0 1px rgba(167,139,250,.35), 0 8px 30px rgba(124,58,237,.45); }
+.brand b { font-family: Outfit, sans-serif; font-weight: 700; font-size: 34px; letter-spacing: -.01em; }
+.brand b span { color: var(--violet-2); }
+.brand .url { font-size: 20px; font-weight: 500; color: var(--muted); letter-spacing: .02em; }
+
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 10px 20px; border-radius: 999px;
+  font-size: 18px; font-weight: 700; letter-spacing: .16em; color: var(--lilac);
+  background: rgba(124,58,237,.14); border: 1px solid var(--line);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+}
+.eyebrow i { width: 8px; height: 8px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 12px var(--mint); }
+
+h1 { font-family: Outfit, sans-serif; font-weight: 800; letter-spacing: -.015em; line-height: 1; }
+.grad {
+  background: linear-gradient(92deg, var(--lilac) 0%, var(--indigo) 45%, var(--violet) 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  padding-right: .06em;
+}
+.sub { font-size: 30px; line-height: 1.4; color: var(--muted); font-weight: 400; }
+.sub strong { color: var(--text); font-weight: 600; }
+
+/* Android phone mockup. --w sets the outer width; screenshots are 945x2048. */
+.phone {
+  --bz: calc(var(--w) * .034);
+  --sw: calc(var(--w) - 2 * var(--bz));
+  --r: calc(var(--w) * .135);
+  position: absolute; width: var(--w);
+  height: calc(var(--sw) * 2.16720 + 2 * var(--bz));
+  border-radius: var(--r);
+  background: linear-gradient(150deg, #4a4d5c 0%, #1a1c24 22%, #0c0d12 55%, #2b2e3a 100%);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(255,255,255,.18),
+    inset 0 0 0 4px #07080b,
+    0 50px 90px -20px rgba(0,0,0,.75),
+    0 0 0 1px rgba(0,0,0,.6);
+}
+.phone::before, .phone::after { content: ""; position: absolute; right: -3px; width: 4px; border-radius: 0 3px 3px 0; background: linear-gradient(#3b3e4b, #1c1e26); }
+.phone::before { top: 22%; height: 9%; }
+.phone::after { top: 34%; height: 5%; }
+.screen {
+  position: absolute; inset: var(--bz); overflow: hidden; background: #000;
+  border-radius: calc(var(--r) - var(--bz));
+}
+.screen > img { display: block; width: 100%; height: 100%; }
+/* Status bar: covers the original (cluttered) status bar with a clean one.
+   Background stretches source rows 80-88 of the screenshot so colour matches the screen. */
+.sb {
+  --ho: calc(var(--sw) * .08466);
+  position: absolute; top: 0; left: 0; right: 0; height: var(--ho);
+  background-repeat: no-repeat;
+  background-size: 100% calc(var(--ho) * 256);
+  background-position: 0 calc(var(--ho) * -10);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: calc(var(--ho) * .12) calc(var(--sw) * .07) 0;
+  font: 600 calc(var(--sw) * .042)/1 Inter, sans-serif; color: #fff;
+}
+.sb svg { height: calc(var(--sw) * .036); width: auto; display: block; }
+.sb .ic { display: flex; gap: calc(var(--sw) * .016); align-items: center; }
+.cam {
+  position: absolute; left: 50%; top: calc(var(--sw) * .03); transform: translateX(-50%);
+  width: calc(var(--sw) * .036); height: calc(var(--sw) * .036); border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #2a3350 0 18%, #05060a 40%);
+  box-shadow: 0 0 0 1.5px #000;
+}
+.glare {
+  position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(115deg, rgba(255,255,255,.10) 0%, rgba(255,255,255,0) 28%);
+}
+
+/* Real-UI crop card. Set --img, --x, --y (source px), --cw, --ch (source px), --s (scale). */
+.crop {
+  position: absolute;
+  width: calc(var(--cw) * var(--s) * 1px); height: calc(var(--ch) * var(--s) * 1px);
+  background-image: var(--img); background-repeat: no-repeat;
+  background-size: calc(945px * var(--s)) auto;
+  background-position: calc(var(--x) * var(--s) * -1px) calc(var(--y) * var(--s) * -1px);
+}
+
+.badge { display: block; height: 96px; width: auto; }

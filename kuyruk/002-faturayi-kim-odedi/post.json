@@ -1,0 +1,15 @@
+{
+  "type": "photo",
+  "konu": "Kim ödedi: gider kartı ve paylar",
+  "caption": "\"Bunu kim ödemişti?\" 🤔\n\nBu soruyu bir daha sormana gerek yok. PayDefteri'nde her giderin yanında tarihi, kategorisi, kimin ödediği ve herkesin payı yazıyor.\n\n🧾 Market, fatura, temizlik, ulaşım\n👥 Kişi başı pay otomatik\n🔎 Ödenenler ve planlananlar ayrı ayrı filtrelenir\n\nEv arkadaşını etiketle, bir daha sormasın 😄\n\n👉 PayDefteri'ni denemek için bağlantı profilde.\n\n#PayDefteri #OrtakHarcama #EvArkadaşı #GiderTakibi #MasrafTakibi #BütçeYönetimi #AndroidUygulama",
+  "slides": [
+    {
+      "layout": "kart",
+      "eyebrow": "KİM ÖDEDİ?",
+      "title": "“Bunu kim\n*ödemişti?*”",
+      "sub": "Her giderde cevabı hazır.",
+      "crop": "takip.gider",
+      "note": "Tarih, kategori, ödeyen kişi ve **herkesin payı** tek kartta."
+    }
+  ]
+}

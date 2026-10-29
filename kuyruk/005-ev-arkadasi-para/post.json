@@ -1,0 +1,29 @@
+{
+  "type": "photo",
+  "konu": "Ev arkadaşıyla ortak gider: net bakiye, transfer, filtre",
+  "caption": "Ev arkadaşınla para konuşmak zorunda değilsin, rakamlar konuşsun. 🏡\n\n1️⃣ Net bakiye: kimin alacaklı, kimin borçlu olduğu tek ekranda\n2️⃣ Transfer (mahsup): borçlunun ödediği tutarı kaydet, bakiye kapansın\n3️⃣ Filtreler: ödenenleri ve planlananları ayrı gör\n\nKaydet, ev arkadaşını etiketle 👇\n\n👉 PayDefteri'ni denemek için bağlantı profilde.\n\n#PayDefteri #EvArkadaşı #OrtakGider #Mahsuplaşma #BorçAlacak #ÖğrenciEvi #BütçeYönetimi",
+  "slides": [
+    {
+      "layout": "liste",
+      "eyebrow": "EV ARKADAŞI REHBERİ",
+      "title": "Para konuşmanın\n*kolay yolu*",
+      "items": [
+        {
+          "t": "Net bakiyeye bak",
+          "d": "Kim alacaklı, kim borçlu; tek ekranda.",
+          "crop": "bakiye.kisiler"
+        },
+        {
+          "t": "Transferi kaydet",
+          "d": "Borçlunun ödediği tutar bakiyeyi kapatır.",
+          "crop": "bakiye.transfer"
+        },
+        {
+          "t": "Filtreyle ayır",
+          "d": "Ödenenler ve planlananlar ayrı ayrı.",
+          "crop": "takip.filtre"
+        }
+      ]
+    }
+  ]
+}

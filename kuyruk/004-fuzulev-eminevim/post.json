@@ -1,0 +1,17 @@
+{
+  "type": "photo",
+  "konu": "Ortak taksit / tasarruf finansmanı planı",
+  "caption": "FuzulEv, Eminevim ya da ortak kredi… Taksiti biriyle birlikte mi ödüyorsun? 🏠\n\nPayDefteri'nde ortak planını kur:\n💰 Kalan payını gör\n📅 Teslimata kaç ay kaldığını takip et\n✅ Her ay kimin ödediğini işaretle\n\nKimin ne kadar ödediği anında ortada, tartışmaya yer yok.\n\nTaksit ortağına gönder, ikiniz de rahatlayın 🤝\n\n👉 PayDefteri'ni denemek için bağlantı profilde.\n\n#PayDefteri #TaksitTakibi #FuzulEv #Eminevim #TasarrufFinansmanı #OrtakBorç #KişiselFinans #AndroidUygulama",
+  "slides": [
+    {
+      "layout": "telefon",
+      "eyebrow": "ORTAK TAKSİT",
+      "title": "Taksiti birlikte\nmi *ödüyorsunuz?*",
+      "sub": "FuzulEv, Eminevim, araç ve konut kredileri.",
+      "screen": "onboarding",
+      "crops": [
+        "onboarding.plan"
+      ]
+    }
+  ]
+}

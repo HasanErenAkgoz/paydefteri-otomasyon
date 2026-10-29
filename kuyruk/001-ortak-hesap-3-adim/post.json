@@ -1,0 +1,42 @@
+{
+  "type": "photo",
+  "konu": "Ortak plan kurulumu: plan, gider, bakiye",
+  "caption": "Ortak hesabı kurmak 3 adım sürüyor 👇\n\n1️⃣ Planını oluştur, ortaklarını davet et\n2️⃣ Her gideri ekle, kimin ödediğini işaretle\n3️⃣ Net bakiyeye bak, mahsuplaşıp hesabı kapat\n\nEv arkadaşı, kardeş, sevgili ya da ortak taksit… Hepsi tek defterde. 📒\n\n👉 Android'de ücretsiz indir: https://play.google.com/store/apps/details?id=com.paydefteri.app\n\nKaydet, ortak hesabı karışan arkadaşına gönder. 💜\n\n#PayDefteri #OrtakGider #EvArkadaşı #BütçeYönetimi #KişiselFinans #GiderTakibi #AndroidUygulama #Tasarruf",
+  "slides": [
+    {
+      "layout": "kapak",
+      "eyebrow": "3 ADIMDA",
+      "title": "Ortak hesabı\n*kolayca kur*",
+      "sub": "Kim ne ödedi, kim kime borçlu; tek defterde.",
+      "screen": "planlar"
+    },
+    {
+      "layout": "kart",
+      "eyebrow": "ADIM 1",
+      "title": "Planını *oluştur*",
+      "sub": "Ortaklarını davet et, aynı planı birlikte kullanın.",
+      "crop": "planlar.kart",
+      "note": "Planlar arasında geçiş yap, yenisini oluştur ya da **davetleri kabul et**."
+    },
+    {
+      "layout": "kart",
+      "eyebrow": "ADIM 2",
+      "title": "Gideri *ekle*",
+      "sub": "Kimin ödediği ve herkesin payı otomatik görünür.",
+      "crop": "takip.gider"
+    },
+    {
+      "layout": "kart",
+      "eyebrow": "ADIM 3",
+      "title": "Hesabı *kapat*",
+      "sub": "Net bakiyeye bak, mahsuplaşmayı kaydet.",
+      "crop": "bakiye.kisiler",
+      "note": "Pozitif tutar alacaklı, negatif tutar borçlu kişiyi gösterir."
+    },
+    {
+      "layout": "son",
+      "sub": "Ortak plan, tek defter. Şimdi Android'de.",
+      "play": true
+    }
+  ]
+}

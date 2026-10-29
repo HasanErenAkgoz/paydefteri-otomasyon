@@ -1,0 +1,54 @@
+{
+  "type": "reel",
+  "konu": "Kredi kartı ekstresi içe aktarma ve analiz",
+  "caption": "Kart ekstreni satır satır okumayı bırak. 💳\n\nPDF ekstreni PayDefteri'ne yükle, özeti hazır gelsin:\n📊 Toplam harcama ve işlem sayısı\n🔝 En büyük harcama ve en yüksek kategori\n📈 Ekstre nabzı: dönemin özeti tek kartta\n\n👉 Android'de ücretsiz indir: https://play.google.com/store/apps/details?id=com.paydefteri.app\n\n#PayDefteri #KrediKartı #Ekstre #HarcamaAnalizi #BütçeYönetimi #KişiselFinans #Tasarruf #Reels",
+  "scenes": [
+    {
+      "kind": "hook",
+      "title": "Ekstreyle\n*boğuşmayı bırak*",
+      "metin": "Kart ekstreni satır satır okumaktan sıkıldın mı?"
+    },
+    {
+      "kind": "ekran",
+      "title": "Ekstreni *yükle*",
+      "sub": "PDF olarak içe aktar.",
+      "screen": "analiz",
+      "crops": [
+        "analiz.ekstre"
+      ],
+      "metin": "PDF ekstreni yükle, gerisini pay defteri halletsin."
+    },
+    {
+      "kind": "ekran",
+      "title": "Dönemi *özetle*",
+      "sub": "Ekstre nabzı tek kartta.",
+      "screen": "analiz",
+      "crops": [
+        "analiz.nabiz"
+      ],
+      "metin": "Ekstre nabzı, dönemin özetini tek kartta gösteriyor."
+    },
+    {
+      "kind": "ekran",
+      "title": "Nereye gitti *gör*",
+      "sub": "En büyük harcama, en yüksek kategori.",
+      "screen": "analiz",
+      "crops": [
+        "analiz.kartlar"
+      ],
+      "metin": "En büyük harcamanı ve en yüksek kategorini anında gör."
+    },
+    {
+      "kind": "son",
+      "sub": "Harcamanı tek bakışta gör.",
+      "play": true,
+      "metin": "Şimdi Android'de, pay defteri'ni ücretsiz indir."
+    }
+  ],
+  "kapak": {
+    "eyebrow": "KREDİ KARTI EKSTRESİ",
+    "title": "69 harcama,\n*tek özet*",
+    "crop": "analiz.nabiz",
+    "screen": "analiz"
+  }
+}

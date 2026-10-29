@@ -1,0 +1,55 @@
+{
+  "type": "reel",
+  "konu": "Kim kime borçlu: gider listesi, net bakiye, transfer",
+  "caption": "Ay sonu \"kim kime ne kadar borçlu?\" hesabı mı? 🧮\n\nPayDefteri hesabı senin yerine tutuyor:\n✅ Giderleri ekle, ödeyeni işaretle\n⚖️ Net bakiyede kim alacaklı, kim borçlu gör\n🔄 Ödemeyi transfer olarak kaydet, hesap kapansın\n\nSizin evde hesabı kim tutuyor? 👇\n\n👉 PayDefteri'ni denemek için bağlantı profilde.\n\n#PayDefteri #BorçAlacak #Mahsuplaşma #EvArkadaşı #OrtakGider #KişiselFinans #Reels",
+  "scenes": [
+    {
+      "kind": "hook",
+      "title": "Kim kime\n*borçlu?*",
+      "sub": "Hesap makinesini bırak.",
+      "metin": "Kim kime borçlu, yine hesap mı yapıyorsunuz?"
+    },
+    {
+      "kind": "ekran",
+      "title": "Gideri *ekle*",
+      "sub": "Ödeyen ve paylar otomatik.",
+      "screen": "takip",
+      "crops": [
+        "takip.gider"
+      ],
+      "metin": "Gideri ekle, kimin ödediği ve herkesin payı otomatik çıksın."
+    },
+    {
+      "kind": "ekran",
+      "title": "Bakiyeyi *gör*",
+      "sub": "Kim alacaklı, kim borçlu.",
+      "screen": "bakiye",
+      "crops": [
+        "bakiye.kisiler"
+      ],
+      "metin": "Bakiyeler ekranında kim alacaklı, kim borçlu, tek bakışta gör."
+    },
+    {
+      "kind": "ekran",
+      "title": "Hesabı *kapat*",
+      "sub": "Ödemeyi mahsup olarak kaydet.",
+      "screen": "bakiye",
+      "crops": [
+        "bakiye.transfer"
+      ],
+      "metin": "Ödemeyi mahsup olarak kaydet, hesap kapansın."
+    },
+    {
+      "kind": "son",
+      "sub": "Ortak plan, tek defter.",
+      "play": false,
+      "metin": "Ortak plan, tek defter. Hepsi pay defteri'nde."
+    }
+  ],
+  "kapak": {
+    "eyebrow": "EV ARKADAŞLARI İÇİN",
+    "title": "Kim kime\n*borçlu?*",
+    "crop": "bakiye.kisiler",
+    "screen": "bakiye"
+  }
+}
