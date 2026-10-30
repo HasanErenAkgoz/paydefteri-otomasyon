@@ -77,3 +77,5 @@ urllib.error.URLError: <urlopen error [WinError 10054] Varolan bir bağlantı uz
 2026-10-29 23:25 uretim: kuyruk dolu
 2026-10-30 01:00 rejected 003-reel-kim-kime-borclu
 2026-10-30 01:11 posted 003-reel-kim-kime-borclu: Published to @paydefteri, media id 18114269564337185
+2026-10-30 13:30 no answer for 001-ortak-hesap-3-adim, kept in queue
+2026-10-30 13:37 posted 001-ortak-hesap-3-adim: Published to @paydefteri, media id 18453968581122713

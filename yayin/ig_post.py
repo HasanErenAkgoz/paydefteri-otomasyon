@@ -5,8 +5,9 @@ Usage:
   python ig_post.py reel "caption" video.mp4 [cover.jpg]        # cover = grid/profile thumbnail
   python ig_post.py whoami                                     # check token, posts nothing
 
-Every post first goes to Telegram as a preview with Paylaş / İptal buttons.
-The script waits up to 1 hour and publishes only after Paylaş (.telegram holds bot config).
+Every post first goes to Telegram as a preview with Paylaş / İptal buttons, and to WhatsApp too if a
+.whatsapp file exists. The script waits up to 1 hour and publishes only after Paylaş on either one
+(.telegram holds bot config; .whatsapp holds token, phone_id, to, relay_url, relay_key).
 
 Files can be local paths or public URLs. Local files are uploaded to catbox.moe
 because Instagram only fetches media from a public URL.
@@ -50,6 +51,12 @@ def telegram_config():
     if not f:
         sys.exit("Missing Telegram config: set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID or add a .telegram file")
     return json.loads(f.read_text())
+
+
+def whatsapp_config():
+    """The .whatsapp file, or None to approve on Telegram only."""
+    f = secret_file(".whatsapp")
+    return json.loads(f.read_text()) if f else None
 UA = {"User-Agent": "ig-post/1.0"}
 
 
@@ -79,16 +86,16 @@ def call(method, url, params, retry=True):
         sys.exit(f"API error {e.code}: {e.read().decode()}")
 
 
-def multipart(url, fields, file_field, path):
+def multipart(url, fields, file_field, path, ctype="application/octet-stream", headers={}):
     b = uuid.uuid4().hex
     body = b"".join(
         f'--{b}\r\nContent-Disposition: form-data; name="{k}"\r\n\r\n{v}\r\n'.encode() for k, v in fields.items()
     )
     body += (
         f'--{b}\r\nContent-Disposition: form-data; name="{file_field}"; filename="{path.name}"\r\n'
-        "Content-Type: application/octet-stream\r\n\r\n"
+        f"Content-Type: {ctype}\r\n\r\n"
     ).encode() + path.read_bytes() + f"\r\n--{b}--\r\n".encode()
-    req = urllib.request.Request(url, body, {**UA, "Content-Type": f"multipart/form-data; boundary={b}"})
+    req = urllib.request.Request(url, body, {**UA, **headers, "Content-Type": f"multipart/form-data; boundary={b}"})
     try:
         return fetch(req, 300).decode()
     except urllib.error.HTTPError as e:
@@ -105,9 +112,60 @@ def public_url(src):
     return url
 
 
+def wa_api(wa, payload):
+    url = f"{API}/{wa['phone_id']}/messages"
+    headers = {**UA, "Content-Type": "application/json", "Authorization": f"Bearer {wa['token']}"}
+    req = urllib.request.Request(url, json.dumps({"messaging_product": "whatsapp", "to": wa["to"], **payload}).encode(), headers)
+    try:
+        return json.loads(fetch(req, 60))
+    except urllib.error.HTTPError as e:
+        raise RuntimeError(f"WhatsApp API {e.code}: {e.read().decode()[:300]}")
+
+
+def wa_upload(wa, path, ctype):
+    res = multipart(f"{API}/{wa['phone_id']}/media", {"messaging_product": "whatsapp", "type": ctype}, "file", Path(path),
+                    ctype, {"Authorization": f"Bearer {wa['token']}"})
+    return json.loads(res)["id"]
+
+
+def wa_body(caption, count):
+    # template variables reject line breaks and long space runs
+    text = " ".join(caption.split())[:880]
+    return f"({count} görsel) {text}" if count > 1 else text
+
+
+def wa_preview(wa, nonce, caption, files, username):
+    """Send the post_onayi template: first JPEG as header, Paylaş / İptal buttons.
+
+    A template is the only message that always arrives. The other media are plain messages, which
+    WhatsApp drops when the owner has not written in 24 hours, so the body states the image count.
+    """
+    jpegs = [f for f in files if f.lower().endswith((".jpg", ".jpeg"))]
+    button = lambda i, answer: {"type": "button", "sub_type": "quick_reply", "index": str(i),
+                                "parameters": [{"type": "payload", "payload": f"{answer}:{nonce}"}]}
+    wa_api(wa, {"type": "template", "template": {"name": "post_onayi", "language": {"code": "tr"}, "components": [
+        {"type": "header", "parameters": [{"type": "image", "image": {"id": wa_upload(wa, jpegs[0], "image/jpeg")}}]},
+        {"type": "body", "parameters": [{"type": "text", "text": username},
+                                        {"type": "text", "text": wa_body(caption, len(jpegs))}]},
+        button(0, "ok"), button(1, "no")]}})
+    for f in files:
+        if f != jpegs[0]:
+            kind, ctype = ("video", "video/mp4") if f.lower().endswith(".mp4") else ("image", "image/jpeg")
+            wa_api(wa, {"type": kind, kind: {"id": wa_upload(wa, f, ctype)}})
+
+
+def wa_answer(wa, nonce):
+    req = urllib.request.Request(f"{wa['relay_url']}/yanit/{nonce}", headers={**UA, "Authorization": f"Bearer {wa['relay_key']}"})
+    try:
+        return fetch(req, 30, retry=False).decode()
+    except Exception:  # Telegram must keep working while the relay is down
+        return ""
+
+
 def approve(cmd, caption, files, username):
-    """Send a preview to Telegram and block until the owner taps a button. Returns a notify function."""
+    """Send a preview to Telegram and WhatsApp, block until the owner taps a button. Returns a notify function."""
     tg = telegram_config()
+    wa = whatsapp_config()
     api, chat = f"https://api.telegram.org/bot{tg['bot_token']}", int(tg["chat_id"])
     for f in files:
         method, field = ("sendVideo", "video") if f.lower().endswith(".mp4") else ("sendPhoto", "photo")
@@ -117,20 +175,38 @@ def approve(cmd, caption, files, username):
             multipart(f"{api}/{method}", {"chat_id": chat}, field, Path(f))
 
     nonce = uuid.uuid4().hex[:8]
+    warning = ""
+    if wa:
+        try:
+            wa_preview(wa, nonce, caption, files, username)
+        except (Exception, SystemExit) as e:  # the Telegram preview above still works
+            wa, warning = None, f"\n\n⚠️ WhatsApp önizlemesi gönderilemedi: {str(e)[:200]}"
     buttons = [[{"text": "✅ Paylaş", "callback_data": f"ok:{nonce}"},
                 {"text": "❌ İptal", "callback_data": f"no:{nonce}"}]]
-    text = f"@{username} hesabına paylaşılsın mı?\n\n{caption}"
+    text = f"@{username} hesabına paylaşılsın mı?\n\n{caption}{warning}"
     msg = call("POST", f"{api}/sendMessage",
                {"chat_id": chat, "text": text, "reply_markup": json.dumps({"inline_keyboard": buttons})})["result"]
 
     def notify(status):
         call("POST", f"{api}/editMessageText",
              {"chat_id": chat, "message_id": msg["message_id"], "text": f"{status}\n\n{caption}"})
+        if wa:
+            try:
+                wa_api(wa, {"type": "text", "text": {"body": status}})
+            except Exception:  # a failure here must not look like a failed publish, paylas.py would post again
+                pass
+
+    def finish(ok):
+        if ok:
+            notify("⏳ Onaylandı, paylaşılıyor...")
+            return notify
+        notify("❌ İptal edildi")
+        sys.exit("Rejected at approval, nothing posted")
 
     offset, deadline = 0, time.time() + 3600
     while time.time() < deadline:
         updates = call("GET", f"{api}/getUpdates",
-                       {"offset": offset, "timeout": 50, "allowed_updates": '["callback_query"]'})["result"]
+                       {"offset": offset, "timeout": 5 if wa else 50, "allowed_updates": '["callback_query"]'})["result"]
         for u in updates:
             offset = u["update_id"] + 1
             q = u.get("callback_query")
@@ -138,13 +214,12 @@ def approve(cmd, caption, files, username):
             if not q or q["from"]["id"] != chat or q.get("data", "")[3:] != nonce:
                 continue
             call("POST", f"{api}/answerCallbackQuery", {"callback_query_id": q["id"]})
-            if q["data"].startswith("ok:"):
-                notify("⏳ Onaylandı, paylaşılıyor...")
-                return notify
-            notify("❌ İptal edildi")
-            sys.exit("Rejected on Telegram, nothing posted")
+            return finish(q["data"].startswith("ok:"))
+        answer = wa_answer(wa, nonce) if wa else ""
+        if answer in ("ok", "no"):
+            return finish(answer == "ok")
     notify("⌛ 1 saat içinde cevap gelmedi, paylaşılmadı")
-    sys.exit("No Telegram answer within 1 hour, nothing posted")
+    sys.exit("No approval answer within 1 hour, nothing posted")
 
 
 def wait(token, cid):

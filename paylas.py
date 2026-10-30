@@ -1,4 +1,4 @@
-"""Post the next ready queue item through ig_post.py (Telegram approval first).
+"""Post the next ready queue item through ig_post.py (Telegram or WhatsApp approval first).
 
 Usage: python paylas.py [photo|reel]   # preferred type for this slot
        python paylas.py kontrol        # checks token, Telegram and upload host; posts nothing
@@ -6,7 +6,7 @@ Usage: python paylas.py [photo|reel]   # preferred type for this slot
 Reels never go out in a photo slot.
 
 Queue: kuyruk/<NNN-slug>/post.json plus rendered media (01.jpg... or video.mp4), oldest name first.
-Published -> paylasilanlar/, rejected on Telegram -> reddedilenler/, no answer -> stays for the next slot,
+Published -> paylasilanlar/, rejected -> reddedilenler/, no answer -> stays for the next slot,
 3 failures -> hatali/. Every run is logged to gunluk.txt.
 """
 import json
@@ -134,10 +134,10 @@ def main():
     if r.returncode == 0 and "Published" in out:
         move(item, "paylasilanlar", out)
         log(f"posted {item.name}: {out}")
-    elif "Rejected on Telegram" in out:
+    elif "Rejected at approval" in out:
         move(item, "reddedilenler", out)
         log(f"rejected {item.name}")
-    elif "No Telegram answer" in out:
+    elif "No approval answer" in out:
         log(f"no answer for {item.name}, kept in queue")
     else:
         # one line per failed run, so the line count is the failure count

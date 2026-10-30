@@ -46,6 +46,26 @@
     padding: 12px 28px 12px 12px; border-radius: 999px; background: rgba(14,18,33,.88); border: 1px solid var(--line); }
   .cover .logo img { width: 58px; height: 58px; border-radius: 16px; }
   .cover .logo b { font: 700 34px Outfit, sans-serif; } .cover .logo b span { color: var(--violet-2); }
+
+  /* LinkedIn: 4:5 feed video, plays muted by default, so it carries burned-in subtitles */
+  html.li, html.li body, html.li .post { height: 1350px; }
+  html.li .brand { top: 44px; }
+  html.li .scene .tt { left: 60px; right: 60px; }
+  html.li .hook .tt { top: 46%; }
+  html.li .hook h1 { font-size: 100px; }
+  html.li .ekran .tt { top: 140px; }
+  html.li .ekran h1 { font-size: 80px; }
+  html.li .scene .sub { font-size: 32px; margin-top: 16px; }
+  html.li .phone.main { top: 360px; margin-left: -190px; }
+  html.li .halo { top: 760px; width: 620px; height: 620px; margin: -310px 0 0 -310px; }
+  html.li .son .box { padding-bottom: 120px; }
+  html.li .son .halo { top: 400px !important; width: 400px !important; height: 400px !important; margin: -200px 0 0 -200px !important; }
+  html.li .son img.logo { width: 170px; height: 170px; border-radius: 44px; }
+  html.li .son h1 { margin-top: 40px; font-size: 100px; }
+  html.li .son .badge { margin-top: 44px; height: 110px; }
+  html.li .son .url { margin-top: 24px; }
+  .cc { position: absolute; left: 50%; bottom: 52px; transform: translateX(-50%); z-index: 8; max-width: 960px; width: max-content; text-align: center;
+    padding: 14px 26px; border-radius: 16px; font: 600 36px/1.3 Inter, sans-serif; color: #fff; background: rgba(9,13,22,.84); border: 1px solid var(--line); }
 </style>
 </head>
 <body>
@@ -63,7 +83,23 @@ const prog = (u, a, d) => out3((u - a) / d);
 const FADE = .4;
 let SC = [];
 
-window.build = async (scenes) => {
+// Subtitle chunks for one scene: split at punctuation, then at about 40 chars, timed by character share.
+const subChunks = (text, from, to) => {
+  const shown = text.replace(/pay defteri/g, 'PayDefteri');
+  const parts = shown.split(/(?<=[.,:?!])\s+/).flatMap(p => {
+    const out = []; let line = '';
+    for (const w of p.split(' ')) { if (line && (line + ' ' + w).length > 40) { out.push(line); line = w; } else line = line ? line + ' ' + w : w; }
+    return [...out, line];
+  });
+  const all = parts.reduce((a, p) => a + p.length, 0);
+  let t = from;
+  return parts.map(p => { const end = t + (to - from) * p.length / all; const c = { text: p, from: t, to: end }; t = end; return c; });
+};
+
+let LI = false, CC = [];
+window.build = async (scenes, opts = {}) => {
+  LI = window.LI_COVER = !!opts.li;
+  document.documentElement.classList.toggle('li', LI);
   await preload();
   const post = document.getElementById('post');
   let start = 0;
@@ -75,27 +111,29 @@ window.build = async (scenes) => {
       el.innerHTML = `<div class="halo" style="top:740px;width:560px;height:560px;margin:-280px 0 0 -280px"></div><div class="box">
         <img class="logo" src="assets/logo.png" alt=""><h1>${h1 || 'Pay<span class="grad">Defteri</span>'}</h1>
         <p class="sub">${markup(s.sub || 'Ortak plan, tek defter.')}</p>
-        ${s.play ? '<img class="badge" src="assets/google-play-badge-tr.png" alt=""><div class="url">Android’de ücretsiz · bağlantı profilde</div>' : '<div class="url">paydefteri.com</div>'}</div>`;
+        ${s.play ? '<img class="badge" src="assets/google-play-badge-tr.png" alt=""><div class="url">Android’de ücretsiz · bağlantı ' + (LI ? 'gönderide' : 'profilde') + '</div>' : '<div class="url">paydefteri.com</div>'}</div>`;
     } else {
       el.innerHTML = `<div class="tt"><h1>${h1}</h1>${s.sub ? `<p class="sub">${markup(s.sub)}</p>` : ''}</div>`;
       if (s.kind === 'ekran') {
         el.insertAdjacentHTML('afterbegin', '<div class="halo"></div>');
-        el.append(phoneEl(s.screen, 520, 'main'));
+        el.append(phoneEl(s.screen, LI ? 380 : 520, 'main'));
         const crops = (s.crops || []).slice(0, 2);
         crops.forEach((name, k) => {
-          const c = cropEl(name, 880, crops.length > 1 ? 300 : 400);
+          const c = cropEl(name, LI ? 920 : 880, LI ? 330 : crops.length > 1 ? 300 : 400);
           c.style.left = (540 - c.dataset.w / 2) + 'px';
-          c.style.top = (crops.length > 1 ? [1150, 1480][k] : 1220) + 'px';
+          c.style.top = (LI ? 780 : crops.length > 1 ? [1150, 1480][k] : 1220) + 'px';
           el.append(c);
         });
       }
     }
     post.append(el);
+    if (LI) CC.push(...subChunks(s.metin, start + .3, start + s.dur - (i === scenes.length - 1 ? 1.4 : .25)));
     const sc = { el, s, t0: start, last: i === scenes.length - 1 };
     start += s.dur;
     return sc;
   });
   window.DURATION = start;
+  if (LI) post.insertAdjacentHTML('beforeend', '<div class="cc" id="cc"></div>');
   await Promise.all([...document.images].map(i => i.decode().catch(() => {})));
   seek(0);
 };
@@ -128,6 +166,10 @@ window.showCover = (k = {}) => {
 };
 
 window.seek = (t) => {
+  if (LI) {
+    const c = CC.find(x => t >= x.from && t < x.to), box = document.getElementById('cc');
+    box.textContent = c ? c.text : ''; box.style.display = c ? 'block' : 'none';
+  }
   document.getElementById('ga').style.transform = `translate(${-200 + Math.sin(t * .35) * 120}px, ${900 + Math.cos(t * .3) * 160}px)`;
   document.getElementById('gb').style.transform = `translate(${500 + Math.cos(t * .28) * 140}px, ${-200 + Math.sin(t * .4) * 120}px)`;
   for (const { el, s, t0, last } of SC) {
@@ -136,11 +178,11 @@ window.seek = (t) => {
     el.style.opacity = vis;
     if (!vis) continue;
     el.querySelectorAll('h1 .w').forEach((w, i) => {
-      const p = prog(u, .1 + i * .07, .5);
+      const p = LI && t0 === 0 ? 1 : prog(u, .1 + i * .07, .5); // LinkedIn thumbnail is the first frame
       w.style.opacity = p; w.style.transform = `translateY(${(1 - p) * 50}px)`; w.style.filter = `blur(${(1 - p) * 10}px)`;
     });
     const sub = el.querySelector('.tt .sub');
-    if (sub) { const p = prog(u, .55, .5); sub.style.opacity = p; sub.style.transform = `translateY(${(1 - p) * 24}px)`; }
+    if (sub) { const p = LI && t0 === 0 ? 1 : prog(u, .55, .5); sub.style.opacity = p; sub.style.transform = `translateY(${(1 - p) * 24}px)`; }
     const ph = el.querySelector('.phone');
     if (ph) {
       const p = prog(u, .2, .9);

@@ -1,0 +1,7 @@
+name = "paydefteri-onay"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+
+[[kv_namespaces]]
+binding = "YANITLAR"
+id = "0c0fb38a7da14c1ba89f4776e6890a18"

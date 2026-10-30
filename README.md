@@ -3,6 +3,8 @@
 Her gün 3 post: **12:30 görsel, 18:30 görsel, 21:30 üç günde bir reel (diğer günler görsel)** (Türkiye'de Instagram'ın genel olarak en yoğun olduğu öğle ve akşam saatleri).
 **Her post önce Telegram'a önizleme olarak gelir; "✅ Paylaş"a basılmadan hiçbir şey yayınlanmaz.** 1 saat içinde cevap gelmezse post kuyrukta kalır ve bir sonraki saatte tekrar sorulur.
 
+WhatsApp onayı isteğe bağlıdır: `~/instagram-poster/.whatsapp` dosyası varsa önizleme WhatsApp'a da gider, hangisinde önce basılırsa o geçerlidir. WhatsApp bozulursa Telegram mesajında uyarı çıkar, onay Telegram'dan devam eder. Meta buton yanıtlarını yalnızca açık bir adrese gönderdiği için `whatsapp-relay/` içindeki Cloudflare Worker yanıtı tutar, `ig_post.py` oradan okur. Karuselin diğer görselleri ve reel videosu, son 24 saatte WhatsApp'tan yazmadıysan gelmez; tam önizleme Telegram'dadır.
+
 ## Nasıl çalışır
 | Parça | Ne yapar | Nerede |
 |---|---|---|

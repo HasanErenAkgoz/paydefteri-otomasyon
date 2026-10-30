@@ -3,6 +3,7 @@
 // --onizleme on a reel writes a few still frames (onizleme-*.jpg) instead of the video.
 // A full reel render also writes kapak.jpg, the Instagram cover (designed for the grid's centre 4:5 crop).
 // --kapak writes only the cover.
+// A reel with "format": "linkedin" renders 1080x1350 with burned-in subtitles; its kapak.jpg is the hook frame.
 // Reels are never silent: <item>/ses.mp3 (one uncut voiceover take, one sentence per scene) is required,
 // and scene durations are taken from the pauses in that take (written to zamanlama.json).
 const { chromium } = require('playwright-core');
@@ -68,7 +69,8 @@ const url = f => 'file:///' + path.join(__dirname, f).replace(/\\/g, '/');
         console.log('wrote', out);
       }
     } else if (spec.type === 'reel') {
-      const page = await browser.newPage({ viewport: { width: 1080, height: 1920 } });
+      const li = spec.format === 'linkedin';
+      const page = await browser.newPage({ viewport: { width: 1080, height: li ? 1350 : 1920 } });
       page.on('pageerror', e => errors.push(e.message));
       const voice = path.join(dir, 'ses.mp3');
       if (!fs.existsSync(voice)) throw new Error('reel needs ses.mp3 next to post.json (no silent videos)');
@@ -76,12 +78,12 @@ const url = f => 'file:///' + path.join(__dirname, f).replace(/\\/g, '/');
       spec.scenes.forEach((s, i) => { s.dur = timing.durs[i]; });
       fs.writeFileSync(path.join(dir, 'zamanlama.json'), JSON.stringify(timing.durs));
       await page.goto(url('reel.html'));
-      await page.evaluate(s => build(s), spec.scenes);
+      await page.evaluate(([s, li]) => build(s, { li }), [spec.scenes, li]);
       if (errors.length) throw new Error(errors.join('; '));
       const dur = await page.evaluate(() => window.DURATION);
       if (dur < 5 || dur > 60) throw new Error(`reel length ${dur}s, keep it 5-60s`);
       const writeCover = async () => {
-        await page.evaluate(k => showCover(k || {}), spec.kapak);
+        await page.evaluate(k => (window.LI_COVER ? seek(1.5) : showCover(k || {})), spec.kapak);
         await page.screenshot({ path: path.join(dir, 'kapak.jpg'), type: 'jpeg', quality: 92 });
       };
       if (flag === '--kapak') {
