@@ -109,6 +109,9 @@ def kontrol():
 
 
 def main():
+    # a task that woke the PC must keep it awake while it waits up to an hour for Telegram
+    from uyanik_tut import keep_awake
+    keep_awake()
     want = sys.argv[1] if len(sys.argv) > 1 else None
     if want == "kontrol":
         return kontrol()
