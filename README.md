@@ -6,7 +6,8 @@ Her gün 3 post: **12:30 görsel, 18:30 görsel, 21:30 üç günde bir reel (di�
 ## Nasıl çalışır
 | Parça | Ne yapar | Nerede |
 |---|---|---|
-| Windows Görev Zamanlayıcısı `\PayDefteri\Instagram-1230/1830/2130` | `paylas.py` çalıştırır: kuyruktaki sıradaki postu `ig_post.py` ile Telegram onayına gönderir; son reel 3+ gün önceyse 21:30'da reel, değilse görsel | Bilgisayar açık ve oturum açıkken çalışır |
+| Windows Görev Zamanlayıcısı `\PayDefteri\Instagram-1230/1830/2130` | `paylas.py` çalıştırır: kuyruktaki sıradaki postu `ig_post.py` ile Telegram onayına gönderir; son reel 3+ gün önceyse 21:30'da reel, değilse görsel | PC'yi uykudan uyandırır; oturum açık olmalı, PC **kapalıysa** çalışmaz |
+| Windows görevi `\PayDefteri\Uretim-Uyandir-2305` | PC'yi uykudan uyandırıp 90 dk uyanık tutar ki Claude gece üretimini yapabilsin | Aynı |
 | Claude zamanlanmış görevi "PayDefteri Instagram içerik üretimi" (her gece 23:15) | Kuyrukta 6'dan az hazır post varsa gerçek ekranlardan yeni postlar üretir. **Paylaşmaz.** | Claude masaüstü uygulaması açıkken çalışır |
 
 ## Klasörler
