@@ -43,6 +43,23 @@ export default {
       }
       return new Response((await env.YANITLAR.get(nonce)) ?? "");
     }
+
+    // Instagram fetches media from a public URL. The long random name keeps it private, and it expires with the post run.
+    const medya = /^\/medya\/([0-9a-f]{32}\.(jpg|jpeg|mp4))$/.exec(url.pathname);
+    if (medya && req.method === "PUT") {
+      if (req.headers.get("authorization") !== `Bearer ${env.RELAY_KEY}`) {
+        return new Response("forbidden", { status: 403 });
+      }
+      const data = await req.arrayBuffer();
+      if (!data.byteLength) return new Response("empty", { status: 400 });
+      await env.YANITLAR.put(`medya:${medya[1]}`, data, { expirationTtl: 7200 });
+      return new Response("ok");
+    }
+    if (medya && (req.method === "GET" || req.method === "HEAD")) {
+      const data = await env.YANITLAR.get(`medya:${medya[1]}`, "arrayBuffer");
+      if (!data) return new Response("not found", { status: 404 });
+      return new Response(data, { headers: { "content-type": medya[2] === "mp4" ? "video/mp4" : "image/jpeg" } });
+    }
     return new Response("not found", { status: 404 });
   },
 };

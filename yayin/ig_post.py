@@ -105,7 +105,14 @@ def multipart(url, fields, file_field, path, ctype="application/octet-stream", h
 def public_url(src):
     if src.startswith(("http://", "https://")):
         return src
-    # shortcut: anonymous catbox.moe upload, file stays public forever; move to own S3/Cloudinary if that matters
+    wa = whatsapp_config()
+    if wa:
+        # catbox answered 200 with an empty stored file on 2026-11-01, so the relay Worker hosts media when it is set up
+        name = f"{uuid.uuid4().hex}{Path(src).suffix.lower()}"
+        url = f"{wa['relay_url']}/medya/{name}"
+        fetch(urllib.request.Request(url, Path(src).read_bytes(), {**UA, "Authorization": f"Bearer {wa['relay_key']}"}, method="PUT"), 300)
+        return url
+    # shortcut: anonymous catbox.moe upload, file stays public forever and can be stored empty; only used without .whatsapp
     for attempt in range(3):
         time.sleep(15 * attempt)
         try:

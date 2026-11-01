@@ -52,7 +52,15 @@ assert "WhatsApp önizlemesi gönderilemedi" in sent[0]
 assert ig.wa_body("satır bir\nsatır  iki", 3) == "(3 görsel) satır bir satır iki"
 assert "\n" not in ig.wa_body("a\n\n\nb" * 900, 1) and len(ig.wa_body("a" * 2000, 1)) <= 900
 
+# with the relay set up, media goes to the Worker with the key, not to catbox
+puts = []
+ig.fetch = lambda req, timeout, retry=True: puts.append(req) or b"ok"
+url = ig.public_url("a.JPG")
+assert url.startswith("https://relay.test/medya/") and url.endswith(".jpg")
+assert puts[0].method == "PUT" and puts[0].get_header("Authorization") == "Bearer k"
+
 # an empty upload answer is tried again, and only 3 failures stop the post
+ig.whatsapp_config = lambda: None
 ig.time.sleep = lambda s: None
 answers = iter(["", "https://files.catbox.moe/a.jpg"])
 ig.multipart = lambda *a, **k: next(answers)
