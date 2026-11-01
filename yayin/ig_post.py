@@ -106,10 +106,16 @@ def public_url(src):
     if src.startswith(("http://", "https://")):
         return src
     # shortcut: anonymous catbox.moe upload, file stays public forever; move to own S3/Cloudinary if that matters
-    url = multipart("https://catbox.moe/user/api.php", {"reqtype": "fileupload"}, "fileToUpload", Path(src)).strip()
-    if not url.startswith("https://"):
-        sys.exit(f"Upload failed for {src}: {url}")
-    return url
+    for attempt in range(3):
+        time.sleep(15 * attempt)
+        try:
+            url = multipart("https://catbox.moe/user/api.php", {"reqtype": "fileupload"}, "fileToUpload", Path(src)).strip()
+        except SystemExit as e:
+            url = str(e)
+        # catbox sometimes answers 200 with an empty body, and the post is already approved by now
+        if url.startswith("https://"):
+            return url
+    sys.exit(f"Upload failed for {src}: {url}")
 
 
 def wa_api(wa, payload):
@@ -234,14 +240,44 @@ def wait(token, cid):
     sys.exit(f"Container {cid} not ready after 5 minutes")
 
 
+def publish(token, me, cmd, caption, files):
+    auth = {"access_token": token}
+    base = f"{API}/{me['id']}"
+
+    if cmd == "reel":
+        params = {**auth, "media_type": "REELS", "video_url": public_url(files[0]), "caption": caption}
+        if len(files) == 2:
+            params["cover_url"] = public_url(files[1])
+        cid = call("POST", f"{base}/media", params)["id"]
+    elif len(files) == 1:
+        cid = call("POST", f"{base}/media", {**auth, "image_url": public_url(files[0]), "caption": caption})["id"]
+    else:
+        kids = [call("POST", f"{base}/media", {**auth, "image_url": public_url(f), "is_carousel_item": "true"})["id"]
+                for f in files]
+        for k in kids:
+            wait(token, k)
+        cid = call("POST", f"{base}/media",
+                   {**auth, "media_type": "CAROUSEL", "children": ",".join(kids), "caption": caption})["id"]
+
+    wait(token, cid)
+    # no retry: a dropped response may hide a publish that went through, and a retry would post twice
+    return call("POST", f"{base}/media_publish", {**auth, "creation_id": cid}, retry=False)
+
+
+def try_notify(notify, status):
+    try:
+        notify(status)
+    except (Exception, SystemExit):  # a failed status message must not look like a failed publish, paylas.py would post again
+        pass
+
+
 def main():
     args = sys.argv[1:]
     if not args or args[0] not in ("photo", "reel", "whoami"):
         sys.exit(__doc__)
     token = ig_token()
-    auth = {"access_token": token}
 
-    page = call("GET", f"{API}/me", {**auth, "fields": "name,instagram_business_account{id,username}"})
+    page = call("GET", f"{API}/me", {"access_token": token, "fields": "name,instagram_business_account{id,username}"})
     if "instagram_business_account" not in page:
         sys.exit(f"Page {page['name']} has no linked Instagram professional account")
     me = page["instagram_business_account"]
@@ -267,27 +303,12 @@ def main():
         if len(files) == 2 and Path(files[1]).suffix.lower() not in (".jpg", ".jpeg"):
             sys.exit(f"Reel cover must be JPEG: {files[1]}")
     notify = approve(cmd, caption, files, me["username"])
-    base = f"{API}/{me['id']}"
-
-    if cmd == "reel":
-        params = {**auth, "media_type": "REELS", "video_url": public_url(files[0]), "caption": caption}
-        if len(files) == 2:
-            params["cover_url"] = public_url(files[1])
-        cid = call("POST", f"{base}/media", params)["id"]
-    elif len(files) == 1:
-        cid = call("POST", f"{base}/media", {**auth, "image_url": public_url(files[0]), "caption": caption})["id"]
-    else:
-        kids = [call("POST", f"{base}/media", {**auth, "image_url": public_url(f), "is_carousel_item": "true"})["id"]
-                for f in files]
-        for k in kids:
-            wait(token, k)
-        cid = call("POST", f"{base}/media",
-                   {**auth, "media_type": "CAROUSEL", "children": ",".join(kids), "caption": caption})["id"]
-
-    wait(token, cid)
-    # no retry: a dropped response may hide a publish that went through, and a retry would post twice
-    post = call("POST", f"{base}/media_publish", {**auth, "creation_id": cid}, retry=False)
-    notify(f"✅ @{me['username']} hesabında paylaşıldı")
+    try:
+        post = publish(token, me, cmd, caption, files)
+    except (Exception, SystemExit) as e:
+        try_notify(notify, f"⚠️ Onaylandı ama paylaşım tamamlanamadı: {str(e)[:200]}")
+        raise
+    try_notify(notify, f"✅ @{me['username']} hesabında paylaşıldı")
     print(f"Published to @{me['username']}, media id {post['id']}")
 
 

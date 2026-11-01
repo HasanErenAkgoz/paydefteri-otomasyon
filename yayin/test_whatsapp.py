@@ -51,4 +51,38 @@ assert "WhatsApp önizlemesi gönderilemedi" in sent[0]
 # the template refuses line breaks in variables, and a carousel says its size
 assert ig.wa_body("satır bir\nsatır  iki", 3) == "(3 görsel) satır bir satır iki"
 assert "\n" not in ig.wa_body("a\n\n\nb" * 900, 1) and len(ig.wa_body("a" * 2000, 1)) <= 900
+
+# an empty upload answer is tried again, and only 3 failures stop the post
+ig.time.sleep = lambda s: None
+answers = iter(["", "https://files.catbox.moe/a.jpg"])
+ig.multipart = lambda *a, **k: next(answers)
+assert ig.public_url("a.jpg") == "https://files.catbox.moe/a.jpg"
+ig.multipart = lambda *a, **k: ""
+try:
+    ig.public_url("a.jpg")
+    raise AssertionError("failed upload went on")
+except SystemExit as e:
+    assert "Upload failed" in str(e)
+
+# a failure after approval reaches the owner and still fails the run
+notes = []
+ig.ig_token = lambda: "t"
+ig.call = lambda method, url, params, retry=True: {"name": "P", "instagram_business_account": {"id": "1", "username": "paydefteri"}}
+ig.approve = lambda *a: notes.append
+ig.sys.argv = ["ig_post.py", "photo", "c", "https://x.test/a.jpg"]
+def no_publish(*a):
+    ig.sys.exit("Upload failed for a.jpg: ")
+
+ig.publish = no_publish
+try:
+    ig.main()
+    raise AssertionError("failed publish looked fine")
+except SystemExit as e:
+    assert "Upload failed" in str(e)
+assert "paylaşım tamamlanamadı" in notes[0]
+
+# a broken status message after a publish must not fail the run, paylas.py would post twice
+ig.publish = lambda *a: {"id": "9"}
+ig.approve = lambda *a: lambda status: ig.sys.exit("telegram down")
+ig.main()
 print("whatsapp ok")
